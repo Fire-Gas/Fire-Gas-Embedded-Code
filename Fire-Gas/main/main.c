@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "core.h"
+#include "gpio.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -15,7 +16,10 @@ int app_main(void) {
 
     ESP_LOGI(TAG, "[Steps 0] Starting program");
 
-    ESP_LOGI(TAG, "[Steps 1] Launching main Logic Task");
+    ESP_LOGI(TAG, "[Steps 1] Initializing GPIO");
+    ESP_ERROR_CHECK(gpio_init);
+
+    ESP_LOGI(TAG, "[Steps 2] Launching main Logic Task");
 
     // 1024 x 6 = 6144 ( =  6KB)
     xTaskCreate(MainCore, "MainCore", 6144, NULL, 5, NULL);

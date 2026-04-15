@@ -1,4 +1,4 @@
 idf_component_register(
     SRCS "main.c"
-    REQUIRES fire_core freertos
+    REQUIRES fire_core freertos fire_gpio
 )
