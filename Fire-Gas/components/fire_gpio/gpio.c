@@ -4,13 +4,11 @@
 #include "esp_err.h"
 #include "driver/i2c.h"
 
-#define BME680_I2C_ADDR    0x77   // 슬라이드 스위치 기본값
-#define BME680_CHIP_ID_REG 0xD0   // ID가 저장된 레지스터 주소
-#define BME680_CHIP_ID_VAL 0x61   // 읽었을 때 나와야 하는 값
-// GPIO는 SCL, SDA pin에 사용
+// #define BME680_I2C_ADDR    0x77   // 슬라이드 스위치 기본값
+// #define BME680_CHIP_ID_REG 0xD0   // ID가 저장된 레지스터 주소
+// #define BME680_CHIP_ID_VAL 0x61   // 읽었을 때 나와야 하는 값
 
 static const char *TAG = "GPIO";
-
 
 esp_err_t gpio_init(void) {
     esp_err_t ret;
