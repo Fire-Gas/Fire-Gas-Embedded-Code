@@ -4,18 +4,27 @@
 #include "esp_log.h"
 #include "driver/i2c.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+
 static const char* TAG = "Core";
 
 void MainCore(void* pvParameters) {
-    uint8_t chip_id = 0;
-    esp_err_t ret = ESP_OK;
+    xTaskCreate(sensor_check, "sensor_check", 6144, NULL, 5, NULL);
 
-    ret |= i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){BME680_CHIP_ID_REG}, 1, &chip_id, 1, pdMS_TO_TICKS(50));
+    while (1) {
 
-
-    while(ret != ESP_OK || chip_id != BME680_CHIP_ID_VAL) {
-        ESP_LOGW(TAG, "failed to sensor conneted");
     }
-    return;
 }  
 
+/* 센서 체킹 함수 queue에 이상 값 있으면?
+
+    - 다른 센서 하나 더 개발
+    
+    - core 개발
+    - main flow 정링
+
+    - 테스트
+
+*/
