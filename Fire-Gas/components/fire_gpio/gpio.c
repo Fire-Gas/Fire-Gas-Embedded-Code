@@ -1,8 +1,10 @@
 #include "gpio.h"
+#include "pin.h"
 
 #include "esp_log.h"
 #include "esp_err.h"
 #include "driver/i2c.h"
+#include "esp_adc/adc_oneshot.h"
 
 static const char *TAG = "GPIO";
 
@@ -24,6 +26,23 @@ esp_err_t gpio_init(void) {
         ESP_LOGE(TAG, "Fail to install I2C driver");
         return ret;
     }
+
+    adc_oneshot_unit_handle_t adc1_handle;
+    adc_oneshot_unit_init_cfg_t init_config1 = {
+        .unit_id = ADC_UNIT_1,
+        .clk_src = ADC_RTC_CLK_SRC_DEFAULT,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
+
+    adc_oneshot_chan_cfg_t config = {
+        .bitwidth = ADC_BITWIDTH_DEFAULT, 
+        .atten = ADC_ATTEN_DB_12,         
+    };
+
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, CO_CHANNEL, &config));
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, NH3_CHANNEL, &config));
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, NO2_CHANNEL, &config));
+
     return ret;
 }
 
