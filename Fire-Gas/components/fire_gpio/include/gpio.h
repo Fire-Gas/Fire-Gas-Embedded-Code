@@ -2,6 +2,7 @@
 #define GPIO_SETTING
 
 #include "esp_err.h"
+#include <stdio.h>
 
 /**
  * @brief GPIO 초기화 함수

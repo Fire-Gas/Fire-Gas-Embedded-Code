@@ -8,10 +8,16 @@
 #include "esp_adc/adc_oneshot.h"
 
 static const char *TAG = "GPIO";
+
 adc_oneshot_unit_handle_t adc1_handle;
+adc_cali_handle_t adc1_cali_handle = NULL;  
+
+static bool adc_calibration_init(adc_unit_t unit, adc_atten_t atten, adc_cali_handle_t *out_handle);
 
 esp_err_t gpio_init(void) {
+    bool cali_enabled = true;
     esp_err_t ret;
+
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = 21,           
@@ -44,7 +50,9 @@ esp_err_t gpio_init(void) {
     ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, NH3_CHANNEL, &config));
     ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, NO2_CHANNEL, &config));
 
-    if (adc1_handle == NULL) {
+    cali_enabled = adc_calibration_init(ADC_UNIT_1, ADC_ATTEN_DB_12, &adc1_cali_handle);
+
+    if (adc1_handle == NULL || !cali_enabled) {
         ESP_LOGE(TAG, "ADC1 핸들러 관련 오류");
     }
     return ret;
@@ -69,5 +77,27 @@ void sensor_check(void* pvParameters) {
     }
 
     ESP_LOGI(TAG, "Successed to connect sensor");
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(4000));
+}
+
+// 오차 보정 함수
+static bool adc_calibration_init(adc_unit_t unit, adc_atten_t atten, adc_cali_handle_t *out_handle) {
+    adc_cali_handle_t handle = NULL;
+    esp_err_t ret = ESP_FAIL;
+    bool calibrated = false;
+
+
+    // 다른 ADC 사용 센서는 define 사용하여 추가
+    #if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
+        adc_cali_curve_fitting_config_t cali_config = {
+            .unit_id = unit, // adc1, 2 구분
+            .atten = atten, // 감쇠 정도
+            .bitwidth = ADC_BITWIDTH_DEFAULT, // 분해능
+        };
+        ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
+        if (ret == ESP_OK) calibrated = true;
+    #endif
+
+    *out_handle = handle;
+    return calibrated;
 }
