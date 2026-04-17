@@ -14,11 +14,11 @@ esp_err_t gpio_init(void);
 
 /**
  * @brief 센서 연결 확인 함수
- * @param void
+ * @param void* pvParameters
  * @return esp_err_t
  * - ESP_OK   : 성공
  * - ESP_FAIL : 실패
  */
-void sensor_check(void);
+void sensor_check(void* pvParameters);
 
 #endif
