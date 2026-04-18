@@ -1,6 +1,8 @@
 #ifndef BME_SENSOR
 #define BME_SENSOR
 
+#include <stdint.h>
+
 /**
  * @brief BME 센서값 읽기 함수
  * @param void* pvParameters
