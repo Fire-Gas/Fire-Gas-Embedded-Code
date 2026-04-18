@@ -17,7 +17,7 @@ int app_main(void) {
     ESP_LOGI(TAG, "[Steps 0] Starting program");
 
     ESP_LOGI(TAG, "[Steps 1] Initializing GPIO");
-    ESP_ERROR_CHECK(gpio_init);
+    ESP_ERROR_CHECK(gpio_init());
 
     ESP_LOGI(TAG, "[Steps 2] Launching main Logic Task");
 

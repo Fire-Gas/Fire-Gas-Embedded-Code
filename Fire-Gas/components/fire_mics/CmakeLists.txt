@@ -1,0 +1,5 @@
+idf_component_register(
+    SRCS "mics.c"
+    INCLUDE_DIRS "include"
+    REQUIRES fire_gpio fire_common freertos
+)
