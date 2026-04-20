@@ -20,8 +20,8 @@ void MainCore(void* pvParameters) {
 
     mics_data_t mics_data;
     bme_data_t bme_data;
-    uint8_t status = 1;
-    uint8_t retry_cnt;
+    static uint8_t status = 1;
+    static uint8_t retry_cnt;
 
     sensor_target_t sensor_list[] = {
         { mics_queue_handler, &mics_data, sizeof(mics_data_t), "MICS" },

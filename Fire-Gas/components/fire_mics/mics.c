@@ -17,6 +17,7 @@ static const char* TAG = "MICS";
 void mics_sensor_get_value(void* pvParameters) {
     QueueHandle_t mics_queue_hanlder = (QueueHandle_t)pvParameters;
     mics_data_t data;
+    static uint8_t retry_cnt;
 
     int co_raw, nh3_raw, no2_raw;
     int co_mv, nh3_mv, no2_mv; // 위 변수 3개와 너무 동일함 -> 개선 필요

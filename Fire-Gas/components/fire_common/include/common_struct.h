@@ -2,6 +2,8 @@
 #define COMMON_STRUCT
 
 #include <stdint.h>
+#include "freertos/FreeRTOS.h"  
+#include "freertos/queue.h"
 
 typedef struct mics_data_t {
     uint32_t co;
@@ -12,7 +14,7 @@ typedef struct mics_data_t {
 
 typedef struct bme_data_t {
     uint32_t raw_adc;
-    uint32_t real_adc
+    uint32_t real_adc;
 } bme_data_t;
 
 typedef struct __attribute__((packed)) sensor_target_t{
