@@ -17,10 +17,9 @@ static const char* TAG = "MICS";
 void mics_sensor_get_value(void* pvParameters) {
     QueueHandle_t mics_queue_hanlder = (QueueHandle_t)pvParameters;
     mics_data_t data;
-    static uint8_t retry_cnt;
 
-    int co_raw, nh3_raw, no2_raw;
-    int co_mv, nh3_mv, no2_mv; // 위 변수 3개와 너무 동일함 -> 개선 필요
+    static uint16_t co_raw, nh3_raw, no2_raw;
+    static uint16_t co_mv, nh3_mv, no2_mv; // 위 변수 3개와 너무 동일함 -> 개선 필요
 
     while(1) {
         adc_oneshot_read(adc1_handle, CO_CHANNEL, &co_raw);
@@ -41,7 +40,7 @@ void mics_sensor_get_value(void* pvParameters) {
         data.no = no2_mv;
 
         if (xQueueSend(mics_queue_hanlder, &data, pdMS_TO_TICKS(100)) != pdPASS) {
-            ESP_LOGE(TAG, "mics data전송 실패");
+            ESP_LOGE(TAG, "mics data전송 실패, 재전송 시도");
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
