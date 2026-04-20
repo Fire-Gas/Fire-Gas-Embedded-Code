@@ -1,5 +1,6 @@
 #include "mics.h"
 #include "common_handler.h"
+#include "common_struct.h"
 #include "pin.h"
 
 #include <stdint.h>
@@ -15,6 +16,8 @@ static const char* TAG = "MICS";
 
 void mics_sensor_get_value(void* pvParameters) {
     QueueHandle_t mics_queue_hanlder = (QueueHandle_t)pvParameters;
+    mics_data_t data;
+
     int co_raw, nh3_raw, no2_raw;
     int co_mv, nh3_mv, no2_mv; // 위 변수 3개와 너무 동일함 -> 개선 필요
 
@@ -34,6 +37,9 @@ void mics_sensor_get_value(void* pvParameters) {
 
         // 3. 출력 (이제 전압 값으로 확인!)
         ESP_LOGI(TAG, "[MICS-6814 mV] CO: %d mV | NH3: %d mV | NO2: %d mV", co_mv, nh3_mv, no2_mv);
+        if (xQueueSend(mics_queue_hanlder, &data, pdMS_TO_TICKS(100)) != pdPASS) {
+            ESP_LOGE(TAG, "mics data전송 실패");
+        }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
