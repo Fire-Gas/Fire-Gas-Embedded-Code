@@ -8,7 +8,7 @@
  * @param void* pvParameters
  * @return None
  */
-void bme_read_task(void* pvParameters);
+void bme_raw_sensor(void* pvParameters);
 
 /**
  * @brief BME raw값을 도씨 값으로 바꿔주는 함수
