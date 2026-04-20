@@ -35,8 +35,10 @@ void mics_sensor_get_value(void* pvParameters) {
             co_mv = (co_raw * 3300) / 4095;
         }
 
-        // 3. 출력 (이제 전압 값으로 확인!)
-        ESP_LOGI(TAG, "[MICS-6814 mV] CO: %d mV | NH3: %d mV | NO2: %d mV", co_mv, nh3_mv, no2_mv);
+        data.co = co_mv;
+        data.nh = nh3_mv;
+        data.no = no2_mv;
+
         if (xQueueSend(mics_queue_hanlder, &data, pdMS_TO_TICKS(100)) != pdPASS) {
             ESP_LOGE(TAG, "mics data전송 실패");
         }

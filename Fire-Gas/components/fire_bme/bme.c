@@ -1,9 +1,11 @@
 #include "bme.h"
 #include "common_handler.h"
+#include "common_struct.h"
 
 #include "esp_log.h"
 #include "driver/i2c.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/task.h"
 #include <stdint.h>
 
@@ -31,6 +33,9 @@ int32_t bme_sensor(uint32_t temp_adc) {
 }
 
 void bme_raw_sensor(void* pvParameters) {
+    QueueHandle_t bme_queue_handler = (QueueHandle_t)pvParameters;
+    bme_data_t data;
+
     esp_err_t ret;
     uint8_t raw_temp[3]; 
     uint32_t temp_adc;
@@ -70,8 +75,14 @@ void bme_raw_sensor(void* pvParameters) {
             int32_t bme_real_sensor = bme_sensor(temp_adc);
             float real_temp_float = bme_real_sensor / 100.0;
 
-            ESP_LOGI(TAG, "Raw temp data: %lu / Real temp aata: %.2f", temp_adc, real_temp_float);
-        } else {
+            data.raw_adc = temp_adc;
+            data.real_adc = real_temp_float;
+
+            if (xQueueSend(bme_queue_handler, &data, pdMS_TO_TICKS(100)) != pdPASS) {
+                ESP_LOGE(TAG, "bme data 전송 실패");
+            }
+        } 
+        else {
             ESP_LOGE(TAG, "데이터 읽기 실패");
         }
 
