@@ -1,8 +1,4 @@
 idf_component_register(
     INCLUDE_DIRS "include"
-<<<<<<< Updated upstream
     REQUIRES esp_adc freertos
-=======
-    REQUIRES esp_adc
->>>>>>> Stashed changes
 )

@@ -1,6 +1,6 @@
-#include "scd41.h"
+#include "SCD41.h"
 #include "pin.h"
-#include "common_handler.h"
+#include "common_struct.h"
 
 #include "driver/i2c.h"
 #include "esp_log.h"
