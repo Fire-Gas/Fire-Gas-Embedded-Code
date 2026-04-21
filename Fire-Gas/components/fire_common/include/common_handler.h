@@ -1,5 +1,5 @@
-#ifndef COMMON_GPIO_PIN
-#define COMMON_GPIO_PIN
+#ifndef COMMON_HANDLER
+#define COMMON_HANDLER
 
 #include "esp_adc/adc_oneshot.h"
 
