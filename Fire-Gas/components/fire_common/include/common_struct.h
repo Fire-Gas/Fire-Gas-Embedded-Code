@@ -24,10 +24,10 @@ typedef struct __attribute__((packed)) sensor_target_t{
     const char* name;
 } sensor_target_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) scd41_data_t{
     uint16_t co2;
-    float temperature;
-    float humidity;
+    int32_t temperature;
+    int32_t humidity;
 } scd41_data_t;
 
 #endif
