@@ -1,5 +1,6 @@
 #include "gpio.h"
 #include "pin.h"
+#include "SCD41.h"
 #include "common_handler.h"
 
 #include "esp_log.h"
@@ -15,6 +16,7 @@ adc_cali_handle_t adc1_cali_handle = NULL;
 static bool adc_calibration_init(adc_unit_t unit, adc_atten_t atten, adc_cali_handle_t *out_handle);
 
 esp_err_t gpio_init(void) {
+    // i2c init
     bool cali_enabled = true;
     esp_err_t ret;
 
@@ -35,6 +37,7 @@ esp_err_t gpio_init(void) {
         return ret;
     }
 
+    // adc init
     adc_oneshot_unit_init_cfg_t init_config1 = {
         .unit_id = ADC_UNIT_1,
         .clk_src = ADC_RTC_CLK_SRC_DEFAULT,
@@ -51,6 +54,9 @@ esp_err_t gpio_init(void) {
     ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, NO2_CHANNEL, &config));
 
     cali_enabled = adc_calibration_init(ADC_UNIT_1, ADC_ATTEN_DB_12, &adc1_cali_handle);
+
+    // 센서 init
+    scd41_init();
 
     if (adc1_handle == NULL || !cali_enabled) {
         ESP_LOGE(TAG, "ADC1 핸들러 관련 오류");
