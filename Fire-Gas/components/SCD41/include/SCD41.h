@@ -9,8 +9,6 @@
 #define SCD41_CMD_READ_MEASURE     0xec05
 #define SCD41_CMD_STOP_MEASURE     0x3f86
 
-esp_err_t scd41_init(void);
-
-esp_err_t scd41_read_data(void);
+void scd41_sensor_task(void* pvParameters);
 
 #endif

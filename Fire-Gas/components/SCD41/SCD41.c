@@ -10,7 +10,7 @@
 
 static const char *TAG = "SCD41";
 
-scd41_data_t g_scd41_info;
+static scd41_data_t g_scd41_info;
 
 // 명령 보내기
 static esp_err_t scd41_send_command(uint16_t command) {
@@ -18,7 +18,7 @@ static esp_err_t scd41_send_command(uint16_t command) {
     return i2c_master_write_to_device(I2C_NUM_0, SCD41_I2C_ADDR, cmd_buffer, 2, pdMS_TO_TICKS(100));
 }
 
-esp_err_t scd41_init(void) {
+static esp_err_t scd41_init(void) {
     // 측정 중지
     scd41_send_command(SCD41_CMD_STOP_MEASURE);
     vTaskDelay(pdMS_TO_TICKS(500));
@@ -34,7 +34,7 @@ esp_err_t scd41_init(void) {
     return ret;
 }
 
-esp_err_t scd41_read_data(void) {
+static esp_err_t scd41_read_data(void) {
     uint8_t cmd[2] = {(uint8_t)(SCD41_CMD_READ_MEASURE >> 8), (uint8_t)(SCD41_CMD_READ_MEASURE & 0xFF)};
     uint8_t raw_data[9]; // CO2(3) + T(3) + H(3) (Data 2 bytes + CRC 1 byte씩)
 
@@ -57,4 +57,30 @@ esp_err_t scd41_read_data(void) {
     }
 
     return ret;
+}
+
+void scd41_sensor_task(void* pvParameters) {
+    QueueHandle_t scd_queue = (QueueHandle_t)pvParameters;
+    scd41_data_t sensor_data;
+
+    if (scd41_init() != ESP_OK) {
+        ESP_LOGE(TAG, "SCD41 초기화 실패");
+        vTaskDelete(NULL);
+    }
+
+    ESP_LOGI("SCD41_TASK", "SCD41 수집 태스크 시작");
+
+    while (1) {
+        if (scd41_read_data() == ESP_OK) {
+            sensor_data = g_scd41_info;
+
+            if (xQueueSend(scd_queue, &sensor_data, pdMS_TO_TICKS(100)) != pdPASS) {
+                ESP_LOGW("SCD41_TASK", "Queue 전송 실패 (Full)");
+            }
+        } else {
+            ESP_LOGE("SCD41_TASK", "데이터 읽기 실패");
+        }
+        // 센서 구조상 측정 시간이 좀 오래걸림
+        vTaskDelay(pdMS_TO_TICKS(5000));
+    }
 }

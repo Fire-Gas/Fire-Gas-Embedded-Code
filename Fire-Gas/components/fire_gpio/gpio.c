@@ -55,9 +55,6 @@ esp_err_t gpio_init(void) {
 
     cali_enabled = adc_calibration_init(ADC_UNIT_1, ADC_ATTEN_DB_12, &adc1_cali_handle);
 
-    // 센서 init
-    scd41_init();
-
     if (adc1_handle == NULL || !cali_enabled) {
         ESP_LOGE(TAG, "ADC1 핸들러 관련 오류");
     }
