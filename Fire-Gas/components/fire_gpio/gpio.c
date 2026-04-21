@@ -91,6 +91,7 @@ static bool adc_calibration_init(adc_unit_t unit, adc_atten_t atten, adc_cali_ha
 
 
     // 다른 ADC 사용 센서는 define 사용하여 추가
+    // 기체 센서 같은 모듈은 화학적 반응을 기다려야 하므로 센싱 속도가 느림 -> ADC에서 적절한 값 설정 필요
     #if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
         adc_cali_curve_fitting_config_t cali_config = {
             .unit_id = unit, // adc1, 2 구분
