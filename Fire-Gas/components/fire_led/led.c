@@ -1,4 +1,5 @@
 #include "led.h"
+#include "common_struct.h"
 
 #include "driver/gpio.h"
 #include "esp_log.h"
@@ -55,21 +56,32 @@ static void all_leds_off() {
     }
 }
 
-void led_test_task(void *pvParameters) {
+void led_test_task(final_value data) {
     ESP_ERROR_CHECK(led_init());
 
-    while (1) {
-        for (int i = 0; i < LED_CNT; i++) {
-            set_led_state(i, 1);
-            ESP_LOGI(TAG, "LED %d ON", i);
-            vTaskDelay(pdMS_TO_TICKS(200));
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-        all_leds_off();
-        ESP_LOGI(TAG, "All LEDs OFF");
-        
-        vTaskDelay(pdMS_TO_TICKS(1000));
+    switch (data)
+    {
+    case  A:
+        printf("Use A\n");
+        break;
+    case  B:
+        printf("Use B\n");
+        break;
+    case  C:
+        printf("Use C\n");
+        break;
+    case  K:
+        printf("Use K\n");
+        break;
+    case  battery:
+        printf("Need to charge\n");
+        break;
+    case  warn:
+        printf("Occured SW/HW error\n");
+        break;
+    
+    default:
+        ESP_LOGW(TAG, "어느 분류에도 속하지 않음");
+        break;
     }
 }
