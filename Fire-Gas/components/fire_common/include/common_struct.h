@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"  
 #include "freertos/queue.h"
+#include "driver/gpio.h"
 
 typedef struct mics_data_t {
     uint32_t co;
@@ -32,11 +33,14 @@ typedef struct __attribute__((packed)) scd41_data_t{
 
 typedef enum final_value {
     A = 0,
-    B = 1,
-    C = 2,
-    K = 3,
-    battery = 5,
-    warn = 6,
+    B,
+    C,
+    K,
+    batt,
+    warn,
+    LED_CNT,
 } final_value;
+
+extern const gpio_num_t led_pins[LED_CNT];
 
 #endif

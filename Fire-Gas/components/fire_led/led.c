@@ -9,13 +9,14 @@
 #include "freertos/task.h"
 
 static const char* TAG = "LED";
-static const uint8_t LED_CNT = 5;
-static const gpio_num_t led_pins[5] = {
-    GPIO_NUM_2,   // A
-    GPIO_NUM_4,   // B
-    GPIO_NUM_5,   // K
-    GPIO_NUM_18,  // battery
-    GPIO_NUM_19   // warn
+
+const gpio_num_t led_pins[LED_CNT] = {
+    [A]    = GPIO_NUM_2,
+    [B]    = GPIO_NUM_4,
+    [C]    = GPIO_NUM_7,  
+    [K]    = GPIO_NUM_5,
+    [batt] = GPIO_NUM_18,
+    [warn] = GPIO_NUM_19
 };
 
 esp_err_t led_init(void) {
@@ -75,9 +76,9 @@ void led_configure(final_value data) {
         printf("Use K\n");
         gpio_set_level(led_pins[K], 1); 
         break;
-    case  battery:
+    case  batt:
         printf("Need to charge\n");
-        gpio_set_level(led_pins[battery], 1);
+        gpio_set_level(led_pins[batt], 1);
         break;
     case  warn:
         printf("Occured SW/HW error\n");
