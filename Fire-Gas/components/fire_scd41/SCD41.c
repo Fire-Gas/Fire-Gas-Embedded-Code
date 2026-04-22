@@ -63,10 +63,7 @@ static esp_err_t scd41_read_data(void) {
     uint8_t cmd[2] = {(uint8_t)(SCD41_CMD_READ_MEASURE >> 8), (uint8_t)(SCD41_CMD_READ_MEASURE & 0xFF)};
     uint8_t raw_data[9]; // CO2(3) + T(3) + H(3) (Data 2 bytes + CRC 1 byte씩)
 
-    esp_err_t ret = i2c_master_write_read_device(I2C_NUM_0, SCD41_I2C_ADDR, 
-                                                cmd, 2, 
-                                                raw_data, 9, 
-                                                pdMS_TO_TICKS(100));
+    esp_err_t ret = i2c_master_write_read_device(I2C_NUM_0, SCD41_I2C_ADDR, cmd, 2, raw_data, 9, pdMS_TO_TICKS(100));
 
     if (ret != ESP_OK) return ret;
 
