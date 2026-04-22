@@ -2,7 +2,7 @@
 #include "gpio.h"
 #include "mics.h"
 #include "bme.h"
-#include "SCD41.h"
+#include "scd41.h"
 
 #include "esp_log.h"
 #include "driver/i2c.h"

@@ -1,4 +1,4 @@
-#include "SCD41.h"
+#include "scd41.h"
 #include "pin.h"
 #include "common_struct.h"
 

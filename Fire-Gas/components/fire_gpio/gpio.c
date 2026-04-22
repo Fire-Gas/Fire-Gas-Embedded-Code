@@ -1,6 +1,6 @@
 #include "gpio.h"
 #include "pin.h"
-#include "SCD41.h"
+#include "scd41.h"
 #include "common_handler.h"
 
 #include "esp_log.h"
