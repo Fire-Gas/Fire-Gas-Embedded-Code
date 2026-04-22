@@ -11,4 +11,11 @@
  */
 void led_configure(final_value data);
 
+/**
+ * @brief led gpio 초기화 함수
+ * @param None
+ * @return None
+ */
+esp_err_t led_init(void);
+
 #endif

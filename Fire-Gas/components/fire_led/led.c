@@ -18,7 +18,7 @@ static const gpio_num_t led_pins[5] = {
     GPIO_NUM_19   // warn
 };
 
-static esp_err_t led_init(void) {
+esp_err_t led_init(void) {
     uint64_t pin_mask = 0;
     esp_err_t ret = 1;
 
@@ -58,8 +58,6 @@ static void all_leds_off() {
 }
 
 void led_configure(final_value data) {
-    ESP_ERROR_CHECK(led_init());
-
     switch (data) {
     case  A:
         printf("Use A\n");
