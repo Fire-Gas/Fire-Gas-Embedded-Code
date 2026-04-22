@@ -24,12 +24,15 @@ typedef struct __attribute__((packed)) sensor_target_t{
     const char* name;
 } sensor_target_t;
 
+<<<<<<< HEAD
 typedef struct __attribute__((packed)) scd41_data_t{
     uint16_t co2;
     int32_t temperature;
     int32_t humidity;
 } scd41_data_t;
 
+=======
+>>>>>>> origin/LED-Task
 typedef enum final_value {
     A = 0,
     B = 1,
