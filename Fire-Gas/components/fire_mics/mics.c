@@ -18,8 +18,8 @@ void mics_sensor_get_value(void* pvParameters) {
     QueueHandle_t mics_queue_hanlder = (QueueHandle_t)pvParameters;
     mics_data_t data;
 
-    static uint16_t co_raw, nh3_raw, no2_raw;
-    static uint16_t co_mv, nh3_mv, no2_mv; // 위 변수 3개와 너무 동일함 -> 개선 필요
+    int co_raw, nh3_raw, no2_raw;
+    int co_mv, nh3_mv, no2_mv; // 위 변수 3개와 너무 동일함 -> 개선 필요
 
     while(1) {
         adc_oneshot_read(adc1_handle, CO_CHANNEL, &co_raw);
