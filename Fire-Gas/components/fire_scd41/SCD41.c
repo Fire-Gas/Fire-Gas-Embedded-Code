@@ -65,7 +65,9 @@ static esp_err_t scd41_read_data(void) {
 
     esp_err_t ret = i2c_master_write_read_device(I2C_NUM_0, SCD41_I2C_ADDR, cmd, 2, raw_data, 9, pdMS_TO_TICKS(100));
 
-    if (ret != ESP_OK) return ret;
+    if (ret != ESP_OK) {
+        return ret;
+    }
 
     if (scd41_generate_crc(&raw_data[0], 2) != raw_data[2] || 
         scd41_generate_crc(&raw_data[3], 2) != raw_data[5] || 
