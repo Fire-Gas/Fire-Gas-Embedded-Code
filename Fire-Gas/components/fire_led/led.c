@@ -2,6 +2,7 @@
 
 #include "driver/gpio.h"
 #include "esp_log.h"
+#include "esp_err.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -16,8 +17,10 @@ static const gpio_num_t led_pins[5] = {
     GPIO_NUM_19
 };
 
-static void led_init(void) {
+static esp_err_t led_init(void) {
     uint64_t pin_mask = 0;
+    esp_err_t ret = 1;
+
     for (int i = 0; i < LED_CNT; i++) {
         pin_mask |= (1ULL << led_pins[i]);
     }
@@ -31,8 +34,12 @@ static void led_init(void) {
         .intr_type = GPIO_INTR_DISABLE     
     };
 
-    gpio_config(&io_conf);
+    if ((ret = gpio_config(&io_conf)) != ESP_OK) {
+        ESP_LOGE(TAG, "LED 초기화 실패");
+        return ESP_FAIL;
+    }
     ESP_LOGI(TAG, "%d개의 LED 초기화 완료", LED_CNT);
+    return ESP_OK;
 }
 
 // 모든 LED 켜기 (사용하지 않음)
@@ -49,7 +56,7 @@ static void all_leds_off() {
 }
 
 void led_test_task(void *pvParameters) {
-    led_init();
+    ESP_ERROR_CHECK(led_init());
 
     while (1) {
         for (int i = 0; i < LED_CNT; i++) {
