@@ -53,4 +53,7 @@ void MainCore(void* pvParameters) {
             ESP_LOGI(TAG, "모든 데이터 수신 성공 (%d개)", sensor_count);
         }
     }
+
+
+    // 결과가 나오면 led_configure 호출
 }

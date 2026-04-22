@@ -31,10 +31,10 @@ typedef struct __attribute__((packed)) scd41_data_t{
 } scd41_data_t;
 
 typedef enum final_value {
-    A = 1,
-    B = 2,
-    C = 3,
-    K = 4,
+    A = 0,
+    B = 1,
+    C = 2,
+    K = 3,
     battery = 5,
     warn = 6,
 } final_value;
