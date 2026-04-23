@@ -34,19 +34,19 @@ int32_t bme_sensor(uint32_t temp_adc) {
 }
 
 esp_err_t bme_init(void) {
-    esp_err_t ret;
-    uint8_t buf[3];
+    esp_err_t ret = ESP_OK;
+    uint8_t reg_addrs[3] = {0xE9, 0x8A, 0x8C};
+    uint8_t read_buf[2];
 
     ESP_ERROR_CHECK(sensor_check());
-    ret = i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0xE9}, 1, buf, 2, pdMS_TO_TICKS(100));
-    par_t1 = (uint16_t)((buf[1] << 8) | buf[0]);
+    for (uint8_t i = 0; i < 3; i++) {
+        uint8_t read_len = (i == 2) ? 1 : 2; 
 
-    ret |= i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0x8A}, 1, buf, 2, pdMS_TO_TICKS(100));
-    par_t2 = (int16_t)((buf[1] << 8) | buf[0]);
-
-    ret |= i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0x8C}, 1, buf, 1, pdMS_TO_TICKS(100));
-    par_t3 = (int8_t)buf[0];
-
+        ret |= i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, &reg_addrs[i], 1, read_buf, read_len, pdMS_TO_TICKS(100));
+        if (i == 0)      par_t1 = (uint16_t)((read_buf[1] << 8) | read_buf[0]);
+        else if (i == 1) par_t2 = (int16_t)((read_buf[1] << 8) | read_buf[0]);
+        else if (i == 2) par_t3 = (int8_t)read_buf[0];
+    }
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "캘리브레이션 데이터 읽기 실패");
         return ESP_FAIL;
