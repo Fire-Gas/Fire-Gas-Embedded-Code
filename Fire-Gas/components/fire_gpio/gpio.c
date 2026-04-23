@@ -61,7 +61,7 @@ esp_err_t gpio_init(void) {
     return ret;
 }
 
-void sensor_check(void* pvParameters) {
+esp_err_t sensor_check(void) {
     uint8_t chip_id = 0;
 
     esp_err_t ret_BME = ESP_OK;
@@ -81,6 +81,7 @@ void sensor_check(void* pvParameters) {
 
     ESP_LOGI(TAG, "Successed to connect sensor");
     vTaskDelay(pdMS_TO_TICKS(4000));
+    return ret_BME;
 }
 
 // 오차 보정 함수

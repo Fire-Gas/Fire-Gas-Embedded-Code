@@ -39,7 +39,6 @@ void MainCore(void* pvParameters) {
     };
     const int sensor_count = sizeof(sensor_list) / sizeof(sensor_list[0]);
 
-    xTaskCreate(sensor_check, "sensor_check", 6144, NULL, 5, NULL);
     xTaskCreate(mics_sensor_get_value, "mics_sensor_get_value", 6144, (void*)mics_queue_handler, 5, NULL);
     xTaskCreate(bme_raw_sensor, "bme_raw_sensor", 6144, (void*)bme_queue_hadler, 5, NULL);
     xTaskCreate(scd41_sensor_task, "scd41_task", 4096, (void*)scd_queue_handler, 5, NULL);
@@ -58,6 +57,8 @@ void MainCore(void* pvParameters) {
         if (retry_cnt == 0) {
             ESP_LOGI(TAG, "모든 데이터 수신 성공 (%d개)", sensor_count);
         }
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
 

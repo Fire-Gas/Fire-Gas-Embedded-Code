@@ -73,7 +73,7 @@ void mics_sensor_get_value(void* pvParameters) {
                 adc_cali_raw_to_voltage(adc1_cali_handle, raw_vals[i], &mv_vals[i]);
             } else {
                 mv_vals[i] = (raw_vals[i] * 3300) / 4095;
-                        ESP_LOGE(TAG, "adc1_cali_handle핸들러 관련 오류 발생");
+                ESP_LOGE(TAG, "adc1_cali_handle핸들러 관련 오류 발생");
             }
         }
 

@@ -1,6 +1,7 @@
 #include "bme.h"
 #include "common_handler.h"
 #include "common_struct.h"
+#include "gpio.h"
 
 #include "esp_log.h"
 #include "driver/i2c.h"
@@ -32,6 +33,29 @@ int32_t bme_sensor(uint32_t temp_adc) {
     return calc_temp;
 }
 
+esp_err_t bme_init(void) {
+    esp_err_t ret;
+    uint8_t buf[3];
+
+    ESP_ERROR_CHECK(sensor_check());
+    ret = i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0xE9}, 1, buf, 2, pdMS_TO_TICKS(100));
+    par_t1 = (uint16_t)((buf[1] << 8) | buf[0]);
+
+    ret |= i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0x8A}, 1, buf, 2, pdMS_TO_TICKS(100));
+    par_t2 = (int16_t)((buf[1] << 8) | buf[0]);
+
+    ret |= i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0x8C}, 1, buf, 1, pdMS_TO_TICKS(100));
+    par_t3 = (int8_t)buf[0];
+
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "캘리브레이션 데이터 읽기 실패");
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "BME680 준비 완료 (T1:%u, T2:%d, T3:%d)", par_t1, par_t2, par_t3);
+    return ESP_OK;
+}
+
 void bme_raw_sensor(void* pvParameters) {
     QueueHandle_t bme_queue_handler = (QueueHandle_t)pvParameters;
     bme_data_t data;
@@ -40,16 +64,7 @@ void bme_raw_sensor(void* pvParameters) {
     uint8_t raw_temp[3]; 
     uint32_t temp_adc;
 
-    uint8_t calib_t1[2];
-    uint8_t calib_t2_t3[3];
-
-    i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0xE9}, 1, calib_t1, 2, pdMS_TO_TICKS(50));
-    par_t1 = (calib_t1[1] << 8) | calib_t1[0]; 
-
-    i2c_master_write_read_device(I2C_NUM_0, BME680_I2C_ADDR, (uint8_t[]){0x8A}, 1, calib_t2_t3, 3, pdMS_TO_TICKS(50));
-    par_t2 = (int16_t)((calib_t2_t3[1] << 8) | calib_t2_t3[0]);
-    par_t3 = (int8_t)calib_t2_t3[2];
-
+    ESP_ERROR_CHECK(bme_init());
     while(1) {
         uint8_t cmd[2] = {0x74, 0x25};
         // 0x74: register     (제어 레지스터 위치) 
@@ -72,8 +87,8 @@ void bme_raw_sensor(void* pvParameters) {
 
         if (ret == ESP_OK) {
             temp_adc = (raw_temp[0] << 12) | (raw_temp[1] << 4) | (raw_temp[2] >> 4);
-            int32_t bme_real_sensor = bme_sensor(temp_adc);
-            float real_temp_float = bme_real_sensor / 100.0;
+            int32_t bme_real_sensor = (int32_t)bme_sensor(temp_adc);
+            float real_temp_float = (float)bme_real_sensor / 100.0;
 
             data.raw_adc = temp_adc;
             data.real_adc = real_temp_float;
