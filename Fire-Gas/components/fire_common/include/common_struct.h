@@ -49,10 +49,10 @@ typedef enum final_value {
 extern const gpio_num_t led_pins[LED_CNT];
 
 typedef enum {
-    ADS1115_CH_0 = 0,
-    ADS1115_CH_1 = 1,
-    ADS1115_CH_2 = 2,
-    ADS1115_CH_3 = 3
+    ADS1115_CH_3 = 3,
+    ADS1115_CH_4 = 4,
+    ADS1115_CH_5 = 5,
+    ADS1115_CH_6 = 6
 } ads1115_channel_t;
 
 #endif

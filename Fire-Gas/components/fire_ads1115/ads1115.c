@@ -34,7 +34,7 @@ esp_err_t ads1115_read_raw(ads1115_channel_t channel, int16_t *out_raw) {
     }
 
     // 변환 시간 대기 (최소 8ms)
-    vTaskDelay(pdMS_TO_TICKS(10));
+    vTaskDelay(pdMS_TO_TICKS(20));
 
     // Conversion Register에서 데이터 읽기
     uint8_t reg_ptr = 0x00;
