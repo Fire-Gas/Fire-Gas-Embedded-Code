@@ -39,7 +39,7 @@ esp_err_t ads1115_read_raw(ads1115_channel_t channel, int16_t *out_raw) {
     // Conversion Register에서 데이터 읽기
     uint8_t reg_ptr = 0x00;
     uint8_t rx_buf[2];
-    i2c_master_write_read_device(I2C_NUM_0, 0x48, &reg_ptr, 1, rx_buf, 2, pdMS_TO_TICKS(100));
+    ret = i2c_master_write_read_device(I2C_NUM_0, 0x48, &reg_ptr, 1, rx_buf, 2, pdMS_TO_TICKS(100));
 
     if (ret == ESP_OK) {
         // 결과값을 포인터에 저장
@@ -50,5 +50,5 @@ esp_err_t ads1115_read_raw(ads1115_channel_t channel, int16_t *out_raw) {
 }
 
 float ads1115_raw_to_voltage(int16_t raw) {
-    return raw * 0.125f; 
+    return raw * 0.1875f; 
 }
