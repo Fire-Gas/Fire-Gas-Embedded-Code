@@ -18,9 +18,7 @@ static const char* TAG = "MICS";
 #include "driver/gpio.h"
 #include "esp_log.h"
 
-float base_volt_co = 0;
-float base_volt_nh3 = 0;
-float base_volt_no2 = 0;
+adc_channel_t channels[3] = {CO_CHANNEL, NH3_CHANNEL, NO2_CHANNEL};
 
 esp_err_t mics_init(void) {
     if (adc1_handle == NULL) {
@@ -33,34 +31,28 @@ esp_err_t mics_init(void) {
     실제로 30s ~ 60s 정도 필요
     */
     vTaskDelay(pdMS_TO_TICKS(5000));
+   
+    int32_t raw;
+    int32_t mv;
+    uint8_t samples = 20; // 20번의 샘플링
+    uint32_t values[3] = {0};
 
-    int raw;
-    int mv;
-    long sum_co = 0, sum_nh3 = 0, sum_no2 = 0;
-    int samples = 20;
-
-    for (int i = 0; i < samples; i++) {
-        adc_oneshot_read(adc1_handle, CO_CHANNEL, &raw);
-        adc_cali_raw_to_voltage(adc1_cali_handle, raw, &mv);
-        sum_co += mv;
-
-        adc_oneshot_read(adc1_handle, NH3_CHANNEL, &raw);
-        adc_cali_raw_to_voltage(adc1_cali_handle, raw, &mv);
-        sum_nh3 += mv;
-
-        adc_oneshot_read(adc1_handle, NO2_CHANNEL, &raw);
-        adc_cali_raw_to_voltage(adc1_cali_handle, raw, &mv);
-        sum_no2 += mv;
-        
-        vTaskDelay(pdMS_TO_TICKS(50));
+    if (adc1_cali_handle) {
+        for (uint8_t i = 0; i < samples; i++) {
+            for(uint8_t j = 0; j < 3; j++) {
+                adc_oneshot_read(adc1_handle, channels[j], &raw);
+                adc_cali_raw_to_voltage(adc1_cali_handle, raw, &mv);
+                values[j] += mv;
+            }
+            vTaskDelay(pdMS_TO_TICKS(50));
+        }
+    }
+    else {
+        ESP_LOGE(TAG, "adc1_cali_handle핸들러 관련 오류 발생");
     }
 
-    base_volt_co = (float)sum_co / samples;
-    base_volt_nh3 = (float)sum_nh3 / samples;
-    base_volt_no2 = (float)sum_no2 / samples;
-
-    ESP_LOGI(TAG, "영점 조절 완료 - CO: %.2fmV, NH3: %.2fmV, NO2: %.2fmV", 
-             base_volt_co, base_volt_nh3, base_volt_no2);
+    ESP_LOGI(TAG, "영점 조절 완료 - CO: %lumV, NH3: %lumV, NO2: %.lumV", 
+             values[0] / samples, values[1] / samples, values[2] / samples);
 
     return ESP_OK;
 }
@@ -69,7 +61,6 @@ void mics_sensor_get_value(void* pvParameters) {
     QueueHandle_t mics_queue_handler = (QueueHandle_t)pvParameters;
     mics_data_t data;
 
-    adc_channel_t channels[3] = {CO_CHANNEL, NH3_CHANNEL, NO2_CHANNEL};
     int raw_vals[3];
     int mv_vals[3];
 
@@ -82,6 +73,7 @@ void mics_sensor_get_value(void* pvParameters) {
                 adc_cali_raw_to_voltage(adc1_cali_handle, raw_vals[i], &mv_vals[i]);
             } else {
                 mv_vals[i] = (raw_vals[i] * 3300) / 4095;
+                        ESP_LOGE(TAG, "adc1_cali_handle핸들러 관련 오류 발생");
             }
         }
 
