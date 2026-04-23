@@ -3,17 +3,7 @@
 
 #include <stdint.h>
 #include "esp_err.h"
-
-#define ADS1115_I2C_ADDR         0x48
-#define ADS1115_REG_CONVERSION   0x00
-#define ADS1115_REG_CONFIG       0x01
-
-typedef enum {
-    ADS1115_CH_0 = 0,
-    ADS1115_CH_1 = 1,
-    ADS1115_CH_2 = 2,
-    ADS1115_CH_3 = 3
-} ads1115_channel_t;
+#include "common_struct.h"
 
 esp_err_t ads1115_init(void);
 
