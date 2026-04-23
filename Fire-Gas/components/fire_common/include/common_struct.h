@@ -31,6 +31,11 @@ typedef struct __attribute__((packed)) scd41_data_t{
     int32_t humidity;
 } scd41_data_t;
 
+typedef struct __attribute__((packed)){
+    uint32_t voltage_mv;
+    bool gas_detected;
+} mq5_data_t;
+
 typedef enum final_value {
     A = 0,
     B,
