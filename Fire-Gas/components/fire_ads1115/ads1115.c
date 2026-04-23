@@ -1,4 +1,5 @@
 #include "ads1115.h"
+#include "ads1115_setting.h"
 
 #include "driver/i2c.h"
 #include "esp_log.h"
@@ -15,17 +16,17 @@ esp_err_t ads1115_read_raw(ads1115_channel_t channel, int16_t *out_raw) {
         return ESP_ERR_INVALID_ARG;
     }
 
-    // 기본 설정값
-    uint16_t config = 0xC183;
-    // 채널 비트 클리어
-    config &= ~(0x7000);
-    // 채널 선택 (A0~A3)
-    config |= (0x4000 + (channel << 12));
+    uint16_t config = ADS1115_OS_START | ADS1115_PGA_4_096V | ADS1115_MODE_SINGLE_SHOT | ADS1115_DR_128SPS | ADS1115_COMP_QUE_DISABLE;
 
-    uint8_t tx_buf[3];
-    tx_buf[0] = 0x01;
-    tx_buf[1] = (uint8_t)(config >> 8);
-    tx_buf[2] = (uint8_t)(config & 0xFF);
+    config &= ~(0x7 << ADS1115_MUX_SHIFT);
+    
+    config |= ((0x4 + channel) << ADS1115_MUX_SHIFT);
+
+    uint8_t tx_buf[3] = {
+        ADS1115_REG_CONFIG, 
+        (uint8_t)(config >> 8),   // 상위 8비트
+        (uint8_t)(config & 0xFF)  // 하위 8비트
+    };
 
     // 설정 전송
     esp_err_t ret = i2c_master_write_to_device(I2C_NUM_0, 0x48, tx_buf, 3, pdMS_TO_TICKS(100));
