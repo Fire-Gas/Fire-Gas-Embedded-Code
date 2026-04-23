@@ -3,6 +3,7 @@
 #include "mics.h"
 #include "bme.h"
 #include "scd41.h"
+#include "mq5.h"
 
 #include "esp_log.h"
 #include "driver/i2c.h"
@@ -42,6 +43,7 @@ void MainCore(void* pvParameters) {
     xTaskCreate(mics_sensor_get_value, "mics_sensor_get_value", 6144, (void*)mics_queue_handler, 5, NULL);
     xTaskCreate(bme_raw_sensor, "bme_raw_sensor", 6144, (void*)bme_queue_hadler, 5, NULL);
     xTaskCreate(scd41_sensor_task, "scd41_task", 4096, (void*)scd_queue_handler, 5, NULL);
+    xTaskCreate(mq5_sensor_task, "mq5_task",   4096, (void*)mq5_queue_handler, 5, NULL);
     
     while (1) {
         retry_cnt = 0;

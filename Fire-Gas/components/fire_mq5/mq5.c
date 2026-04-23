@@ -12,10 +12,10 @@
 static const char *TAG = "MQ5";
 
 // 가스 실험 후 어느정도가 가스인지 확인 후 변경
-#define WARNING_VALUE 1500
+static const uint32_t WARNING_VALUE = 1500;
 
 // ADC 설정을 위한 변수
-static esp_adc_cal_characteristics_t *adc_chars;
+static esp_adc_cal_characteristics_t adc_chars_static;
 #define MQ5_ADC_CHANNEL  ADC_CHANNEL_6
 #define MQ5_ADC_UNIT     ADC_UNIT_1
 #define MQ5_DEFAULT_VREF 1100
@@ -27,19 +27,20 @@ static void mq5_adc_init(void) {
     adc1_config_channel_atten(MQ5_ADC_CHANNEL, ADC_ATTEN_DB_11);
 
     // ADC 특성 곡선 보정
-    adc_chars = calloc(1, sizeof(esp_adc_cal_characteristics_t));
-    esp_adc_cal_characterize(MQ5_ADC_UNIT, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, MQ5_DEFAULT_VREF, adc_chars);
+    esp_adc_cal_characterize(MQ5_ADC_UNIT, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, MQ5_DEFAULT_VREF, &adc_chars_static);
 }
 
 static uint32_t mq5_read_voltage(void) {
     uint32_t adc_reading = 0;
+
     // 노이즈 감소를 위해 10번 샘플링하여 평균값 사용
-    for (int i = 0; i < 10; i++) {
+    const int sampling_count = 10;
+    for (int i = 0; i < sampling_count; i++) {
         adc_reading += adc1_get_raw(MQ5_ADC_CHANNEL);
     }
-    adc_reading /= 10;
+    adc_reading /= sampling_count;
 
-    return esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);
+    return esp_adc_cal_raw_to_voltage(adc_reading, &adc_chars_static);
 }
 
 void mq5_sensor_task(void* pvParameters) {
@@ -57,7 +58,7 @@ void mq5_sensor_task(void* pvParameters) {
         
         // 전압 값을 기반으로 농도 계산
         sensor_data.voltage_mv = voltage;
-        sensor_data.gas_detected = (voltage > WARNING_VALUE);
+        sensor_data.gas_detected = (voltage > WARNING_VALUE) ? 1 : 0;
 
         if (xQueueSend(mq5_queue, &sensor_data, pdMS_TO_TICKS(10)) != pdPASS) {
             ESP_LOGW(TAG, "Queue Full");
