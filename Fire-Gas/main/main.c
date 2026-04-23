@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "core.h"
+#include "led.h"
 #include "gpio.h"
 
 #include "freertos/FreeRTOS.h"
@@ -18,6 +19,7 @@ int app_main(void) {
 
     ESP_LOGI(TAG, "[Steps 1] Initializing GPIO");
     ESP_ERROR_CHECK(gpio_init());
+    ESP_ERROR_CHECK(led_init());
 
     ESP_LOGI(TAG, "[Steps 2] Launching main Logic Task");
 

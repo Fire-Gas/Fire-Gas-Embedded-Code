@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"  
 #include "freertos/queue.h"
+#include "driver/gpio.h"
 
 typedef struct mics_data_t {
     uint32_t co;
@@ -34,5 +35,17 @@ typedef struct __attribute__((packed)){
     uint32_t voltage_mv;
     bool gas_detected;
 } mq5_data_t;
+
+typedef enum final_value {
+    A = 0,
+    B,
+    C,
+    K,
+    batt,
+    warn,
+    LED_CNT,
+} final_value;
+
+extern const gpio_num_t led_pins[LED_CNT];
 
 #endif
