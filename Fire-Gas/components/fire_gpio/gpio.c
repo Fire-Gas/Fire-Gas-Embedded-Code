@@ -17,7 +17,7 @@ static bool adc_calibration_init(adc_unit_t unit, adc_atten_t atten, adc_cali_ha
 
 esp_err_t gpio_init(void) {
     // i2c init
-    bool cali_enabled = true;
+    bool cali_enabled = false;
     esp_err_t ret;
 
     i2c_config_t conf = {
@@ -30,10 +30,13 @@ esp_err_t gpio_init(void) {
     };
 
     ret = i2c_param_config(I2C_NUM_0, &conf);
-    ret |= i2c_driver_install(I2C_NUM_0, conf.mode, 0, 0, 0);
-
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Fail to install I2C driver");
+        ESP_LOGE(TAG, "I2C 파라미터 설정 실패");
+        return ret;
+    }
+    ret = i2c_driver_install(I2C_NUM_0, conf.mode, 0, 0, 0);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "I2C 드라이버 설치 실패");
         return ret;
     }
 
@@ -42,7 +45,11 @@ esp_err_t gpio_init(void) {
         .unit_id = ADC_UNIT_1,
         .clk_src = ADC_RTC_CLK_SRC_DEFAULT,
     };
-    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
+    ret = adc_oneshot_new_unit(&init_config1, &adc1_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "ADC1 Unit 생성 실패");
+        return ret;
+    }
 
     adc_oneshot_chan_cfg_t config = {
         .bitwidth = ADC_BITWIDTH_DEFAULT, 
@@ -55,10 +62,12 @@ esp_err_t gpio_init(void) {
 
     cali_enabled = adc_calibration_init(ADC_UNIT_1, ADC_ATTEN_DB_12, &adc1_cali_handle);
 
-    if (adc1_handle == NULL || !cali_enabled) {
-        ESP_LOGE(TAG, "ADC1 핸들러 관련 오류");
+    if (!cali_enabled) {
+        ESP_LOGW(TAG, "ADC 보정(Calibration) 초기화 실패. 오차가 발생할 수 있습니다.");
     }
-    return ret;
+    
+    ESP_LOGI(TAG, "GPIO 및 I2C/ADC 초기화 완료");
+    return ESP_OK;
 }
 
 esp_err_t sensor_check(void) {
