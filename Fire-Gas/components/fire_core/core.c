@@ -13,10 +13,16 @@
 #include "freertos/queue.h"
 
 #include "common_struct.h"
+#include <stdio.h>
+#include <sys/stat.h>
+
+// 경로 SD카드 확인이 필요함 
+#define CSV_FILE_PATH "/sdcard/Sensor_data.csv"
 
 static const char* TAG = "Core";
+static void ai_dataset(mics_data_t* mics_data, bme_data_t* bme_data, scd41_data_t* scd_data, mq5_data_t* mq5_data);
 
-void MainCore(void* pvParameters) {
+void main_core(void* pvParameters) {
 
     QueueHandle_t mics_queue_handler = xQueueCreate(10, sizeof(mics_data_t)); 
     QueueHandle_t bme_queue_hadler = xQueueCreate(10, sizeof(bme_data_t));
@@ -28,7 +34,6 @@ void MainCore(void* pvParameters) {
     scd41_data_t scd_data;
     mq5_data_t mq5_data;
 
-    static uint8_t status = 1;
     static uint8_t retry_cnt;
 
     sensor_target_t sensor_list[] = {
@@ -56,6 +61,8 @@ void MainCore(void* pvParameters) {
 
         if (retry_cnt == 0) {
             ESP_LOGI(TAG, "모든 데이터 수신 성공 (%d개)", sensor_count);
+            ai_dataset(&mics_data, &bme_data, &scd_data, &mq5_data);
+
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -63,4 +70,34 @@ void MainCore(void* pvParameters) {
 
 
     // 결과가 나오면 led_configure 호출
+}
+
+// AI dataset을 모으는 함수로, AI 학습 진행 시 필요한 데이터를 모을 때만 사용한다
+static void ai_dataset(mics_data_t* mics_data, bme_data_t* bme_data, scd41_data_t* scd_data, mq5_data_t* mq5_data) {
+    struct stat st;
+    bool file_exists = (stat(CSV_FILE_PATH, &st) == 0);
+
+    FILE* f = fopen(CSV_FILE_PATH, "a");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "CSV파일 생성 실패");
+        return;
+    }
+
+    if (!file_exists) {
+        fprintf(f, "MICS_CO,MICS_NH,MICS_NO,BME_RAW_ADC,BME_REAL_ADC,SCD_CO2,SCD_TEMP,SCD_HUM,MQ5_VOLTAGE_MV,MQ5_GAS_DETECTED\n");
+    }
+
+    fprintf(f, "%lu,%lu,%lu,%lu,%lu,%u,%ld,%ld,%lu,%d\n",
+            (unsigned long)mics_data->co,
+            (unsigned long)mics_data->nh,
+            (unsigned long)mics_data->no,
+            (unsigned long)bme_data->raw_adc,
+            (unsigned long)bme_data->real_adc,
+            scd_data->co2,
+            (long)scd_data->temperature,
+            (long)scd_data->humidity,
+            (unsigned long)mq5_data->voltage_mv,
+            mq5_data->gas_detected ? 1 : 0); 
+
+    fclose(f);
 }

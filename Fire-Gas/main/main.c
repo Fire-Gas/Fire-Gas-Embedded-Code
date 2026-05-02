@@ -24,7 +24,7 @@ int app_main(void) {
     ESP_LOGI(TAG, "[Steps 2] Launching main Logic Task");
 
     // 1024 x 6 = 6144 ( =  6KB)
-    xTaskCreate(MainCore, "MainCore", 6144, NULL, 5, NULL);
+    xTaskCreate(main_core, "MainCore", 6144, NULL, 5, NULL);
 
     return 0;
 }
