@@ -1,0 +1,10 @@
+idf_component_register(
+    SRCS
+        "fire_ai.cc"
+        "firegas_model.cc"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        fire_common
+        esp-tflite-micro
+)
