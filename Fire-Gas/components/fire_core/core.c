@@ -3,6 +3,7 @@
 #include "mics.h"
 #include "bme.h"
 #include "scd41.h"
+#include "fire_ai.h"
 #include "mq5.h"
 
 #include "esp_log.h"
@@ -18,12 +19,12 @@
 
 // 경로 SD카드 확인이 필요함 
 #define CSV_FILE_PATH "/sdcard/Sensor_data.csv"
+#define AI_TEST_MODE 1
 
 static const char* TAG = "Core";
 static void ai_dataset(mics_data_t* mics_data, bme_data_t* bme_data, scd41_data_t* scd_data, mq5_data_t* mq5_data);
 
 void main_core(void* pvParameters) {
-
     QueueHandle_t mics_queue_handler = xQueueCreate(10, sizeof(mics_data_t)); 
     QueueHandle_t bme_queue_hadler = xQueueCreate(10, sizeof(bme_data_t));
     QueueHandle_t scd_queue_handler = xQueueCreate(5, sizeof(scd41_data_t));
@@ -44,6 +45,10 @@ void main_core(void* pvParameters) {
     };
     const int sensor_count = sizeof(sensor_list) / sizeof(sensor_list[0]);
 
+    if(!fire_ai_init()) {
+        ESP_LOGE(TAG, "AI 초기화 실패");
+    }
+
     xTaskCreate(mics_sensor_get_value, "mics_sensor_get_value", 6144, (void*)mics_queue_handler, 5, NULL);
     xTaskCreate(bme_raw_sensor, "bme_raw_sensor", 6144, (void*)bme_queue_hadler, 5, NULL);
     xTaskCreate(scd41_sensor_task, "scd41_task", 4096, (void*)scd_queue_handler, 5, NULL);
@@ -61,7 +66,16 @@ void main_core(void* pvParameters) {
 
         if (retry_cnt == 0) {
             ESP_LOGI(TAG, "모든 데이터 수신 성공 (%d개)", sensor_count);
+
+            #if AI_TEST_MODE
             ai_dataset(&mics_data, &bme_data, &scd_data, &mq5_data);
+            #else
+            fire_ai_result_t r;
+            if (fire_ai_infer(&mics_data, &bme_data, &scd_data, &mq5_data, &r)) {
+                ESP_LOGI(TAG, "sev=%.3f cls=%d score=%.3f", r.severity, r.class_id, r.class_score);
+            }
+            #endif
+
 
         }
 
