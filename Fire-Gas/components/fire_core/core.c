@@ -29,7 +29,7 @@
 static const char* TAG = "Core";
 static void ai_dataset(mics_data_t* mics_data, bme_data_t* bme_data, scd41_data_t* scd_data, mq5_data_t* mq5_data);
 
-void main_core(void* pvParameters) {
+void main_core(void* pvParameters) {    
     QueueHandle_t mics_queue_handler = xQueueCreate(10, sizeof(mics_data_t)); 
     QueueHandle_t bme_queue_hadler = xQueueCreate(10, sizeof(bme_data_t));
     QueueHandle_t scd_queue_handler = xQueueCreate(5, sizeof(scd41_data_t));
