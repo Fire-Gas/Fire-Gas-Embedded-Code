@@ -3,7 +3,7 @@
 #include "normalizer_params.h"
 
 #include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/all_ops_resolver.h"
+#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
 #include "esp_log.h"
@@ -30,7 +30,8 @@ static const char* TAG = "FireAI";
 #define TENSOR_ARENA_KB 100
 static uint8_t tensor_arena[TENSOR_ARENA_KB * 1024] __attribute__((aligned(16)));
 
-static tflite::AllOpsResolver       s_resolver;
+/* CNN-LSTM 모델에 필요한 ops: Conv2D, Reshape, LSTM, FullyConnected, Softmax, Tanh, Logistic */
+static tflite::MicroMutableOpResolver<8> s_resolver;
 static tflite::MicroInterpreter*    s_interp   = nullptr;
 static TfLiteTensor*                s_input    = nullptr;
 static TfLiteTensor*                s_output   = nullptr;
@@ -126,10 +127,18 @@ static void fill_input_tensor(void)
 
 bool fire_ai_init(void)
 {
+    s_resolver.AddConv2D();
+    s_resolver.AddReshape();
+    s_resolver.AddUnidirectionalSequenceLSTM();
+    s_resolver.AddFullyConnected();
+    s_resolver.AddSoftmax();
+    s_resolver.AddTanh();
+    s_resolver.AddLogistic();
+
     const tflite::Model* model = tflite::GetModel(firegas_model_tflite);
     if (model->version() != TFLITE_SCHEMA_VERSION) {
-        ESP_LOGE(TAG, "TFLite schema 버전 불일치 model=%u runtime=%u",
-                 model->version(), TFLITE_SCHEMA_VERSION);
+        ESP_LOGE(TAG, "TFLite schema 버전 불일치 model=%lu runtime=%lu",
+                 (unsigned long)model->version(), (unsigned long)TFLITE_SCHEMA_VERSION);
         return false;
     }
 

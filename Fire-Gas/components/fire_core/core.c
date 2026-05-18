@@ -24,7 +24,7 @@
 1: csv 수집 모드
 0: ai 추론 모드
 */
-#define AI_TEST_MODE 1 
+#define AI_TEST_MODE 0
 
 static const char* TAG = "Core";
 static void ai_dataset(mics_data_t* mics_data, bme_data_t* bme_data, scd41_data_t* scd_data, mq5_data_t* mq5_data);
