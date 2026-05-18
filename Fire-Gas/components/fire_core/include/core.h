@@ -6,6 +6,6 @@
  * @param void* pvParameters 태스크 생성 파라미터
  * @return None
  */
-void MainCore(void* pvParameters);
+void main_core(void* pvParameters);
 
 #endif
