@@ -44,14 +44,12 @@ esp_err_t led_init(void) {
     return ESP_OK;
 }
 
-// 모든 LED 켜기 (사용하지 않음)
 static void set_led_state(int index, uint32_t state) {
     if (index >= 0 && index < LED_CNT) {
         gpio_set_level(led_pins[index], state);
     }
 }
 
-// 모든 LED 끄기 (사용하지 않음)
 static void all_leds_off() {
     for (int i = 0; i < LED_CNT; i++) {
         gpio_set_level(led_pins[i], 0);
@@ -59,32 +57,32 @@ static void all_leds_off() {
 }
 
 void led_configure(final_value data) {
+    all_leds_off();
     switch (data) {
-    case  A:
-        printf("Use A\n");
+    case A:
+        ESP_LOGW(TAG, "Use A");
         gpio_set_level(led_pins[A], 1);
         break;
-    case  B:
-        printf("Use B\n");
+    case B:
+        ESP_LOGW(TAG, "Use B");
         gpio_set_level(led_pins[B], 1);
         break;
-    case  C:
-        printf("Use C\n");
+    case C:
+        ESP_LOGW(TAG, "Use C");
         gpio_set_level(led_pins[C], 1);
         break;
-    case  K:
-        printf("Use K\n");
-        gpio_set_level(led_pins[K], 1); 
+    case K:
+        ESP_LOGW(TAG, "Use K");
+        gpio_set_level(led_pins[K], 1);
         break;
-    case  batt:
-        printf("Need to charge\n");
+    case batt:
+        ESP_LOGW(TAG, "Need to charge");
         gpio_set_level(led_pins[batt], 1);
         break;
-    case  warn:
-        printf("Occured SW/HW error\n");
-
+    case warn:
+        ESP_LOGW(TAG, "Occurred SW/HW error");
+        gpio_set_level(led_pins[warn], 1);
         break;
-    
     default:
         ESP_LOGW(TAG, "어느 분류에도 속하지 않음");
         break;

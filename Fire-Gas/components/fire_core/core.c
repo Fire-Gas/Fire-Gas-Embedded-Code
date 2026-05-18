@@ -1,6 +1,7 @@
 #include "core.h"
 #include "gpio.h"
 #include "mics.h"
+#include "led.h"
 #include "bme.h"
 #include "scd41.h"
 #include "mq5.h"
@@ -79,11 +80,14 @@ void main_core(void* pvParameters) {
             fire_ai_result_t r;
             if (fire_ai_infer(&mics_data, &bme_data, &scd_data, &mq5_data, &r)) {
                static const char* cls_names[] = {"A화재", "B화재", "C화재", "K화재", "정상"};
-                ESP_LOGI(TAG, "[AI] %s (%.1f%%) | 위험도=%.3f | 만성=%.3f",
+               ESP_LOGI(TAG, "[AI] %s (%.1f%%) | 위험도=%.3f | 만성=%.3f",
                         cls_names[r.class_id],
                         r.class_score * 100.0f,
                         r.severity,
                         r.chronic_ratio);
+                if (r.class_id != FIRE_CLASS_NORMAL) {
+                    led_configure((final_value)r.class_id);
+                }
             }
             #endif
 
